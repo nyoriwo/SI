@@ -1,0 +1,72 @@
+#Area per lipid
+cpptraj <<EOF
+parm ../dib_mem_v3.prmtop
+trajin all_Prod_dib_mem_50ns_skip_${i}_center.mdcrd
+areapermol top :2-313 nlayers 1 out apm_top_mem_dib_${i}.dat
+run
+exit
+EOF
+
+#angle 
+cpptraj
+parm dib_mem_v3.prmtop
+trajin all_Prod_dib_mem_50ns_skip_0_15_last20_center.mdcrd
+vector dib_vec :UNL@N :UNL@O
+vector mem corrplane :ST
+vectormath vec1 dib_vec vec2 mem out dib_angle_0_15_z2.dat name AngleA dotangle
+run
+exit
+
+cpptraj
+parm dib_mem_v3.prmtop
+trajin all_Prod_dib_mem_50ns_skip_16_35_last20_center.mdcrd
+vector dib_vec :UNL@N :UNL@O
+vector mem corrplane :ST
+vectormath vec1 dib_vec vec2 mem out dib_angle_16_35_z2.dat name AngleA dotangle
+run
+exit
+
+cpptraj
+parm dib_mem_v3.prmtop
+trajin all_Prod_dib_mem_50ns_skip_36_42_last20.mdcrd
+vector dib_vec :UNL@N :UNL@O
+vector mem corrplane :ST
+vectormath vec1 dib_vec vec2 mem out dib_angle_36_42_z2.dat name AngleA dotangle
+run
+exit
+
+#water contact
+cpptraj
+parm dib_mem_v3.prmtop
+trajin all_Pull_dib_mem_v3_42ns_skip.mdcrd
+watershell :UNL out contact_dib_wat.dat
+run
+quit
+
+cpptraj
+parm dib_mem_v3.prmtop
+trajin  all_Prod_dib_mem_50ns_skip_last20_center_skip2.mdcrd
+watershell :UNL out contact_dib_wat.dat
+run
+quit
+
+#Hbond
+cpptraj
+parm dib_mem_v3.prmtop
+trajin all_Prod_dib_mem_50ns_skip_16_35_last20_center.mdcrd
+hbond donormask :UNL acceptormask :SPM out hbond_dib_do_SPM_acc_16_35.dat avgout hbond_avg_dib_do_SPM_acc_16_35.dat
+run
+exit
+
+cpptraj
+parm dib_mem_v3.prmtop
+trajin all_Prod_dib_mem_50ns_skip_16_35_last20_center.mdcrd
+hbond donormask :SPM acceptormask :UNL out hbond_dib_acc_SPM_do_16_35.dat avgout hbond_avg_dib_acc_SPM_do_16_35.dat
+run
+exit
+
+#PMF 
+wham --file metadata.dat --min 0.0 --max 42.0 --bins 40  --tolerance 0.00000001 --temperature 303 --output out_v2.pmf
+
+#Diffusion
+python3 parse_fe_diff.py* -fe ../plot_free_energy.dat -diff ../diffusion/all_diffusion_values_new.dat -start 0 -end 42 -space 1 -temp 303

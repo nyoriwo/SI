@@ -1,0 +1,6 @@
+parm /home/sirin/AMBER-Umbrella_COM_restraint_tutorial/windows/lid_proto/lid_proto_mem.prmtop
+trajin /home/sirin/AMBER-Umbrella_COM_restraint_tutorial/windows/lid_proto/dist_0.0/06_Prod_lid_proto_mem_50ns_0.0.nc lastframe
+strip :WAT outprefix nowat
+trajout nowat.lid_p_0.0.pdb
+go
+exit

@@ -1,0 +1,72 @@
+#Area per lipid
+cpptraj <<EOF
+parm ../lid_proto_mem.prmtop
+trajin all_Prod_lid_proto_mem_50ns_skip_${i}_center.mdcrd
+areapermol top :2-313 nlayers 1 out apm_top_mem_lid_proto_${i}.dat
+run
+exit
+EOF
+
+#angle 
+cpptraj
+parm lid_proto_mem.prmtop
+trajin all_Prod_lid_proto_mem_50ns_skip_0_15_last20_center.mdcrd
+vector lid_vec :UNL@C9 :UNL@C4
+vector mem corrplane :ST
+vectormath vec1 lid_vec vec2 mem out lid_proto_angle_0_15_z2.dat name AngleA dotangle
+run
+exit
+
+cpptraj
+parm lid_proto_mem.prmtop
+trajin all_Prod_lid_proto_mem_50ns_skip_16_35_last20_center.mdcrd
+vector lid_vec :UNL@C9 :UNL@C4
+vector mem corrplane :ST
+vectormath vec1 lid_vec vec2 mem out lid_proto_angle_16_35_z2.dat name AngleA dotangle
+run
+exit
+
+cpptraj
+parm lid_proto_mem.prmtop
+trajin all_Prod_lid_proto_mem_50ns_skip_36_42_last20_center.mdcrd
+vector lid_vec :UNL@C9 :UNL@C4
+vector mem corrplane :ST
+vectormath vec1 lid_vec vec2 mem out lid_proto_angle_35_42_z2.dat name AngleA dotangle
+run
+exit
+
+#water contact
+cpptraj
+parm lid_proto_mem.prmtop
+trajin 05_Pull_lid_proto_mem_skip.mdcrd
+watershell :UNL out contact_lid_wat.dat
+run
+exit
+
+cpptraj
+parm lid_proto_mem.prmtop
+trajin all_Prod_lid_proto_mem_50ns_skip_last20_center_skip2.mdcrd
+watershell :UNL out contact_lid_wat.dat
+run
+exit
+
+#Hbond
+cpptraj
+parm lid_proto_mem.prmtop
+trajin all_Prod_lid_proto_mem_50ns_skip_36_42_last20_center.mdcrd
+hbond donormask :UNL acceptormask :SPM out hbond_lid_proto_do_SPM_acc_16_35.dat avgout hbond_avg_lid_proto_do_SPM_acc_16_35.dat
+run
+exit 
+
+cpptraj 
+parm lid_proto_mem.prmtop
+trajin all_Prod_lid_proto_mem_50ns_skip_36_42_last20_center.mdcrd
+hbond donormask :SPM acceptormask :UNL out hbond_lid_proto_acc_SPM_do_16_35.dat avgout hbond_avg_lid_proto_acc_SPM_do_16_35.dat
+run
+exit
+
+#PMF 
+wham --file metadata.dat --min 0.0 --max 42.0 --bins 40  --tolerance 0.00000001 --temperature 303 --output out_v2.pmf
+
+#Diffusion
+python3 parse_fe_diff.py* -fe ../plot_free_energy.dat -diff ../diffusion/all_diffusion_values_new.dat -start 0 -end 42 -space 1 -temp 303
